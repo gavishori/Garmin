@@ -31,7 +31,7 @@ function kind(t) {
   return "other";
 }
 
-let acts = [], layers = new Map(), map, canvas, selected = null;
+let acts = [], layers = new Map(), map, canvas, tiles, selected = null;
 const off = new Set();
 
 function msg(text, ms = 4000) {
@@ -145,12 +145,32 @@ const km = (m) => (m / 1000).toFixed(m < 100000 ? 1 : 0);
 const dur = (s) => `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}`;
 const date = (s) => s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4);
 
+// A straight hop longer than this (metres) between two recorded points is a GPS glitch or a paused watch
+// that was resumed elsewhere, not a real part of the workout; the line is cut there.
+const JUMP = { walk: 1500, run: 1500, hike: 1500, swim: 1500, sup: 1500, ride: 4000, ski: 4000, other: 10000 };
+function parts(pts, limit) {
+  if (!$("clean").checked) return [pts];
+  const out = []; let cur = [pts[0]];
+  for (let i = 1; i < pts.length; i++) {
+    if (map.distance(pts[i - 1], pts[i]) > limit) { if (cur.length > 1) out.push(cur); cur = []; }
+    cur.push(pts[i]);
+  }
+  if (cur.length > 1) out.push(cur);
+  return out.length ? out : [pts];
+}
+
+// Viewer preferences (kept in this browser only)
+const prefs = (() => { try { return JSON.parse(localStorage.getItem("garminMapPrefs")) || {}; } catch (e) { return {}; } })();
+function savePrefs() { try { localStorage.setItem("garminMapPrefs", JSON.stringify(prefs)); } catch (e) { /* private mode */ } }
+const strength = () => +$("strength").value / 100;
+const base = (a) => ({ color: TYPES[kind(a.t)][1], weight: 1 + 2 * strength(), opacity: strength() });
+function restyle() { for (const [a, line] of layers) if (a !== selected) line.setStyle(base(a)); }
+
 function build() {
   for (const l of layers.values()) l.remove();
   layers.clear();
   for (const a of acts) {
-    const k = kind(a.t);
-    const line = L.polyline(decode(a.p), { color: TYPES[k][1], weight: 2.5, opacity: 0.75, renderer: canvas });
+    const line = L.polyline(parts(decode(a.p), JUMP[kind(a.t)]), { ...base(a), renderer: canvas });
     line.on("click", () => select(a, false));
     layers.set(a, line);
   }
@@ -170,7 +190,7 @@ function build() {
   apply(false);
   // Tracks span several countries, so open on the area where most workouts start instead of fitting the whole world.
   if (acts.length) {
-    const starts = [...layers.values()].map((l) => l.getLatLngs()[0]);
+    const starts = [...layers.values()].map((l) => l.getLatLngs()[0][0]);
     const mid = (k) => starts.map((p) => p[k]).sort((a, b) => a - b)[starts.length >> 1];
     map.setView([mid("lat"), mid("lng")], 12);
   }
@@ -198,7 +218,7 @@ function apply(fit) {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 function select(a, zoom) {
-  if (selected && layers.get(selected)) layers.get(selected).setStyle({ weight: 2.5, opacity: 0.75, color: TYPES[kind(selected.t)][1] });
+  if (selected && layers.get(selected)) layers.get(selected).setStyle(base(selected));
   selected = a;
   const line = layers.get(a);
   line.setStyle({ weight: 5, opacity: 1, color: "#facc15" }).bringToFront();
@@ -223,6 +243,15 @@ $("btnImport").onclick = () => $("file").click();
 $("file").onchange = (e) => { importFiles([...e.target.files]); e.target.value = ""; };
 $("btnList").onclick = () => { $("list").hidden = !$("list").hidden; map.invalidateSize(); };
 $("year").onchange = () => apply(true);
+$("strength").value = prefs.strength ?? 75;
+$("bright").value = prefs.bright ?? 100;
+$("clean").checked = prefs.clean ?? true;
+$("strength").oninput = () => { prefs.strength = +$("strength").value; savePrefs(); restyle(); };
+$("bright").oninput = () => { prefs.bright = +$("bright").value; savePrefs(); if (tiles) tiles.setOpacity(prefs.bright / 100); };
+$("clean").onchange = () => {
+  prefs.clean = $("clean").checked; savePrefs();
+  for (const [a, line] of layers) line.setLatLngs(parts(decode(a.p), JUMP[kind(a.t)]));
+};
 
 onAuthStateChanged(auth, async (u) => {
   for (const id of ["btnOut", "btnImport", "btnList"]) $(id).hidden = !u;
@@ -231,7 +260,7 @@ onAuthStateChanged(auth, async (u) => {
   if (!map) {
     map = L.map("map", { preferCanvas: true }).setView([32.27, 34.89], 12);
     canvas = L.canvas({ tolerance: 6 });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap", opacity: $("bright").value / 100 }).addTo(map);
   }
   try { acts = await load(); build(); }
   catch (e) {

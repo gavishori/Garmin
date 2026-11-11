@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a">
   <title>מפת האימונים · Garmin</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header>
@@ -30,6 +30,9 @@
     <div id="filters">
       <select id="year"><option value="">כל השנים</option></select>
       <div id="types"></div>
+      <label class="ctl" title="שקיפות ועובי קווי המסלולים">עוצמת מסלולים <input id="strength" type="range" min="10" max="100" step="5"></label>
+      <label class="ctl" title="כמה מפת הרקע בולטת">בהירות מפה <input id="bright" type="range" min="15" max="100" step="5"></label>
+      <label class="ctl" title="חיתוך קווים ישרים ארוכים שנוצרו משיבושי GPS או מהשהיית השעון"><input id="clean" type="checkbox"> ניקוי קפיצות GPS</label>
     </div>
     <div id="wrap">
       <div id="map"></div>
@@ -39,6 +42,6 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script type="module" src="app.js?v=3"></script>
+  <script type="module" src="app.js?v=4"></script>
 </body>
 </html>
