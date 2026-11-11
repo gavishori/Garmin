@@ -167,7 +167,13 @@ function build() {
     b.onclick = () => { off.has(k) ? off.delete(k) : off.add(k); b.classList.toggle("on"); apply(false); };
     $("types").appendChild(b);
   }
-  apply(true);
+  apply(false);
+  // Tracks span several countries, so open on the area where most workouts start instead of fitting the whole world.
+  if (acts.length) {
+    const starts = [...layers.values()].map((l) => l.getLatLngs()[0]);
+    const mid = (k) => starts.map((p) => p[k]).sort((a, b) => a - b)[starts.length >> 1];
+    map.setView([mid("lat"), mid("lng")], 12);
+  }
 }
 
 function apply(fit) {
