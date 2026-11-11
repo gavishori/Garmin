@@ -1,0 +1,33 @@
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { display: flex; flex-direction: column; background: #0f172a; color: #e2e8f0; font-family: system-ui, "Segoe UI", Arial, sans-serif; }
+header { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #111c33; border-bottom: 1px solid #24324f; flex-wrap: wrap; }
+h1 { font-size: 18px; margin: 0; }
+.gavish-hub { text-decoration: none; font-size: 20px; }
+.grow { flex: 1; }
+.stats { color: #94a3b8; font-size: 13px; }
+button, select { font: inherit; color: inherit; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+button.primary { background: #2563eb; border-color: #2563eb; font-size: 16px; padding: 10px 20px; }
+button.ghost:hover { background: #2a3a55; }
+.center { margin: auto; text-align: center; }
+.err { color: #f87171; min-height: 1.2em; }
+main { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+#filters { display: flex; gap: 8px; align-items: center; padding: 6px 12px; background: #0f172a; overflow-x: auto; }
+#types { display: flex; gap: 6px; }
+.chip { white-space: nowrap; border-radius: 999px; padding: 4px 12px; font-size: 13px; border: 1px solid #334155; background: #1e293b; opacity: .45; }
+.chip.on { opacity: 1; }
+.chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; }
+#wrap { flex: 1; display: flex; min-height: 0; }
+#map { flex: 1; background: #1b2333; }
+#list { width: 320px; overflow-y: auto; background: #111c33; border-inline-start: 1px solid #24324f; }
+.item { padding: 8px 12px; border-bottom: 1px solid #1e2a44; cursor: pointer; font-size: 14px; }
+.item:hover, .item.sel { background: #1e2f52; }
+.item small { color: #94a3b8; display: block; }
+.item i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-inline-end: 6px; }
+#msg { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; padding: 8px 16px; border-radius: 10px; z-index: 1000; max-width: 90%; }
+.leaflet-popup-content { direction: rtl; text-align: right; font-size: 14px; }
+@media (max-width: 700px) {
+  #wrap { flex-direction: column; }
+  #list { width: auto; height: 40%; border-inline-start: 0; border-top: 1px solid #24324f; }
+  .stats { order: 9; width: 100%; }
+}

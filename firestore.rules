@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    // GPS tracks are private: only the owner may read or write.
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.token.email == "gavishori@gmail.com"
+                         && request.auth.token.email_verified == true;
+    }
+  }
+}
