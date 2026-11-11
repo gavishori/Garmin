@@ -16,7 +16,8 @@ const $ = (id) => document.getElementById(id);
 const CHUNK = 700000;            // characters per Firestore document (limit is 1 MiB)
 const TYPES = {
   walk: ["הליכה", "#22c55e"], run: ["ריצה", "#f97316"], ride: ["רכיבה", "#3b82f6"],
-  hike: ["טיול רגלי", "#a3e635"], swim: ["שחייה", "#06b6d4"], other: ["אחר", "#e879f9"]
+  hike: ["טיול רגלי", "#a3e635"], swim: ["שחייה", "#06b6d4"], ski: ["סקי", "#f8fafc"],
+  sup: ["סאפ", "#14b8a6"], other: ["אחר", "#e879f9"]
 };
 function kind(t) {
   t = (t || "").toLowerCase();
@@ -25,6 +26,8 @@ function kind(t) {
   if (/run|jog/.test(t)) return "run";
   if (/cycl|bik|ride/.test(t)) return "ride";
   if (/swim/.test(t)) return "swim";
+  if (/ski|snowboard/.test(t)) return "ski";
+  if (/paddle/.test(t)) return "sup";
   return "other";
 }
 
