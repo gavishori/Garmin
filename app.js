@@ -252,7 +252,8 @@ const cellKey = (la, lo) => Math.floor(la / CELL) + ":" + Math.floor(lo / CELL);
 const FOOT_MAX = { walk: 9, hike: 9, other: 8, run: 20 };
 const onFoot = (a) => {
   const k = kind(a.t);
-  if (!(k in FOOT_MAX) || /driv|motor/i.test(a.t || "")) return false;
+  // "Travel" is the name the watch gives to trips recorded while driving, whatever their average speed
+  if (!(k in FOOT_MAX) || /driv|motor/i.test(a.t || "") || /travel/i.test(a.n || "")) return false;
   return !(a.u > 0) || (a.d || 0) / a.u * 3.6 <= FOOT_MAX[k];
 };
 let trailData = null, trailRes = null, trailLayer = null, trailSel = 0;
