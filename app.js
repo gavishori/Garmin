@@ -247,7 +247,14 @@ const dist = (a, b) => {
   return Math.sqrt(x * x + y * y) * 6371000;
 };
 const cellKey = (la, lo) => Math.floor(la / CELL) + ":" + Math.floor(lo / CELL);
-const onFoot = (a) => ["walk", "run", "hike", "other"].includes(kind(a.t)) && !/driv|motor/i.test(a.t || "");
+// Fastest plausible average (km/h) for a workout done on foot; anything quicker was recorded in a vehicle
+// (e.g. a drive saved as "other" or as a hike) and must not count as walking a trail.
+const FOOT_MAX = { walk: 9, hike: 9, other: 8, run: 20 };
+const onFoot = (a) => {
+  const k = kind(a.t);
+  if (!(k in FOOT_MAX) || /driv|motor/i.test(a.t || "")) return false;
+  return !(a.u > 0) || (a.d || 0) / a.u * 3.6 <= FOOT_MAX[k];
+};
 let trailData = null, trailRes = null, trailLayer = null, trailSel = 0;
 
 function coverage(data) {
